@@ -5,17 +5,22 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.vovai.service.UpdateProducer;
 import ru.vovai.utils.MessageUtils;
+
+import static ru.vovai.model.RabbitQueue.*;
 
 @Component
 @Log4j
 public class UpdateController {
     private TelegramBot telegramBot;
+    private final MessageUtils messageUtils;
+    private final UpdateProducer updateProducer;
 
-    private MessageUtils messageUtils;
 
-    public UpdateController(MessageUtils messageUtils) {
+    public UpdateController(MessageUtils messageUtils, UpdateProducer updateProducer) {
         this.messageUtils = messageUtils;
+        this.updateProducer = updateProducer;
     }
 
     public void registerBot(TelegramBot telegramBot) {
@@ -30,7 +35,7 @@ public class UpdateController {
         if (update.getMessage() != null){
             distributeMessage(update);
         } else {
-            log.error("Received unsupported message type " + update);
+            log.error("Unsupported message type is received: " + update);
         }
     }
 
@@ -54,16 +59,29 @@ public class UpdateController {
         setView(sendMessage);
     }
 
+    private void setFileIsReceivedView(Update update) {
+        var sendMessage = messageUtils.generateSendMessageWithText(update,
+                "Файл получен! Обрабатывается...");
+        setView(sendMessage);
+    }
+
     private void setView(SendMessage sendMessage) {
         telegramBot.sendAnswerMessage(sendMessage);
     }
 
     private void processPhotoMessage(Update update) {
+        updateProducer.produce( PHOTO_MESSAGE_UPDATE , update);
+        setFileIsReceivedView(update);
     }
 
     private void processDocMessage(Update update) {
+        updateProducer.produce( DOC_MESSAGE_UPDATE , update);
+        setFileIsReceivedView(update);
+
     }
 
     private void processTextMessage(Update update) {
+        updateProducer.produce( TEXT_MESSAGE_UPDATE , update);
+        setFileIsReceivedView(update);
     }
 }
