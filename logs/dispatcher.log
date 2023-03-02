@@ -4,3 +4,18 @@
 2023-03-01 15:29:06 DEBUG UpdateProducerImpl:16 - Hello 2
 2023-03-01 15:29:13 ERROR UpdateController:38 - Unsupported message type is received: Update(updateId=358571327, message=null, inlineQuery=null, chosenInlineQuery=null, callbackQuery=null, editedMessage=Message(messageId=8, from=User(id=1862258990, firstName=Владимир, isBot=false, lastName=Ильяшенко, userName=vladillshk, languageCode=ru, canJoinGroups=null, canReadAllGroupMessages=null, supportInlineQueries=null), date=1677673745, chat=Chat(id=1862258990, type=private, title=null, firstName=Владимир, lastName=Ильяшенко, userName=vladillshk, photo=null, description=null, inviteLink=null, pinnedMessage=null, stickerSetName=null, canSetStickerSet=null, permissions=null, slowModeDelay=null, bio=null, linkedChatId=null, location=null, messageAutoDeleteTime=null, hasPrivateForwards=null, HasProtectedContent=null), forwardFrom=null, forwardFromChat=null, forwardDate=null, text=Hello 2dd, entities=null, captionEntities=null, audio=null, document=null, photo=null, sticker=null, video=null, contact=null, location=null, venue=null, animation=null, pinnedMessage=null, newChatMembers=[], leftChatMember=null, newChatTitle=null, newChatPhoto=null, deleteChatPhoto=null, groupchatCreated=null, replyToMessage=null, voice=null, caption=null, superGroupCreated=null, channelChatCreated=null, migrateToChatId=null, migrateFromChatId=null, editDate=1677673752, game=null, forwardFromMessageId=null, invoice=null, successfulPayment=null, videoNote=null, authorSignature=null, forwardSignature=null, mediaGroupId=null, connectedWebsite=null, passportData=null, forwardSenderName=null, poll=null, replyMarkup=null, dice=null, viaBot=null, senderChat=null, proximityAlertTriggered=null, messageAutoDeleteTimerChanged=null, isAutomaticForward=null, hasProtectedContent=null, webAppData=null, videoChatStarted=null, videoChatEnded=null, videoChatParticipantsInvited=null, videoChatScheduled=null), channelPost=null, editedChannelPost=null, shippingQuery=null, preCheckoutQuery=null, poll=null, pollAnswer=null, myChatMember=null, chatMember=null, chatJoinRequest=null)
 2023-03-01 15:29:58 DEBUG UpdateProducerImpl:16 - 
+2023-03-02 16:29:02 DEBUG UpdateProducerImpl:23 - hello
+2023-03-02 16:30:03 DEBUG UpdateProducerImpl:23 - hello world
+2023-03-02 16:30:08 DEBUG UpdateProducerImpl:23 - sosi bibu
+2023-03-02 16:32:58 DEBUG UpdateProducerImpl:23 - hello brother
+2023-03-02 16:57:09 DEBUG UpdateProducerImpl:23 - hello my friend
+2023-03-02 16:57:13 DEBUG UpdateProducerImpl:23 - how are you
+2023-03-02 16:58:16 DEBUG UpdateProducerImpl:23 - sdfg
+2023-03-02 16:58:24 DEBUG UpdateProducerImpl:23 - how are you
+2023-03-02 17:01:23 DEBUG UpdateProducerImpl:23 - hi
+2023-03-02 17:01:26 DEBUG UpdateProducerImpl:23 - how aer you
+2023-03-02 17:01:32 DEBUG UpdateProducerImpl:23 - wtf
+2023-03-02 17:01:35 DEBUG UpdateProducerImpl:23 - aa
+2023-03-02 17:01:44 DEBUG UpdateProducerImpl:23 - 
+2023-03-02 17:01:47 DEBUG UpdateProducerImpl:23 - jjj
+2023-03-02 17:02:02 DEBUG UpdateProducerImpl:23 - Hello from chat
