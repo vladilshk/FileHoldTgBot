@@ -7,10 +7,14 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import ru.vovai.dao.AppUserDAO;
 import ru.vovai.dao.RawDataDAO;
+import ru.vovai.entity.AppDocument;
 import ru.vovai.entity.AppUser;
 import ru.vovai.entity.RawData;
+import ru.vovai.exceptions.UploadFileException;
+import ru.vovai.service.FileService;
 import ru.vovai.service.MainService;
 import ru.vovai.service.ProducerService;
+import ru.vovai.service.enums.ServiceCommands;
 
 import static ru.vovai.entity.enums.UserState.BASIC_STATE;
 import static ru.vovai.entity.enums.UserState.WAIT_FOR_EMAIL_STATE;
@@ -22,11 +26,13 @@ public class MainServiceImpl implements MainService {
     private final RawDataDAO rawDataDAO;
     private final ProducerService producerService;
     private final AppUserDAO appUserDAO;
+    private final FileService fileService;
 
-    public MainServiceImpl(RawDataDAO rawDataDAO, ProducerService producerService, AppUserDAO appUserDAO) {
+    public MainServiceImpl(RawDataDAO rawDataDAO, ProducerService producerService, AppUserDAO appUserDAO, FileService fileService) {
         this.rawDataDAO = rawDataDAO;
         this.producerService = producerService;
         this.appUserDAO = appUserDAO;
+        this.fileService = fileService;
     }
 
 
@@ -34,12 +40,12 @@ public class MainServiceImpl implements MainService {
     public void processTextMessage(Update update) {
         saveRawData(update);
         var appUser = findOrSaveAppUser(update);
-
         var userState = appUser.getState();
         var text = update.getMessage().getText();
         var output = "";
 
-        if (CANCEL.equals(text)){
+        var serviceCommand = ServiceCommands.fromValue(text);
+        if (CANCEL.equals(serviceCommand)){
             output = cancelProcess(appUser);
         } else if (BASIC_STATE.equals(userState)){
             output = processServiceCommand(appUser, text);
@@ -63,9 +69,16 @@ public class MainServiceImpl implements MainService {
             return;
         }
 
-        //TODO: add document save
-        var answer = "Документ успушно загружен! Ссылка для скачивания: http://test.ru/get-doc/777";
-        sendAnswer(answer, chatId);
+        try {
+            AppDocument doc = fileService.processDoc(update.getMessage());
+            //TODO: add file download link generation
+            var answer = "Документ успушно загружен! Ссылка для скачивания: http://test.ru/get-doc/777";
+            sendAnswer(answer, chatId);
+        } catch (UploadFileException ex){
+            log.error(ex);
+            String error = "К сожалению, загрузка файла не удаласью Повторите попытку позже.";
+            sendAnswer(error, chatId);
+        }
     }
 
     @Override

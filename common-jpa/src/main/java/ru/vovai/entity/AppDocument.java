@@ -16,8 +16,10 @@ public class AppDocument {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String telegramFileId;
-    private String docMane;
+    private String docName;
     @OneToOne
     private BinaryContent binaryContent;
+    private String mimeType;
+    private Long fileSize;
 
 }
