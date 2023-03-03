@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import ru.vovai.dao.AppUserDAO;
 import ru.vovai.dao.RawDataDAO;
 import ru.vovai.entity.AppDocument;
+import ru.vovai.entity.AppPhoto;
 import ru.vovai.entity.AppUser;
 import ru.vovai.entity.RawData;
 import ru.vovai.exceptions.UploadFileException;
@@ -90,9 +91,19 @@ public class MainServiceImpl implements MainService {
             return;
         }
 
+        try {
+            AppPhoto photo = fileService.processPhoto(update.getMessage());
+            //TODO: add photo download link generation
+            var answer = "Фото успушно загружен! Ссылка для скачивания: http://test.ru/get-photo/777";
+            sendAnswer(answer, chatId);
+        }
+        catch (UploadFileException e){
+            log.error(e);
+            String error = "К сожалению, загрузка файла не удаласью Повторите попытку позже.";
+            sendAnswer(error, chatId);
+        }
+
         //TODO: add photo save
-        var answer = "Фото успушно загружен! Ссылка для скачивания: http://test.ru/get-photo/777";
-        sendAnswer(answer, chatId);
     }
 
     private boolean isNotAllowToSendContent(Long chatId, AppUser appUser) {
