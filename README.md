@@ -4,7 +4,7 @@
 Пользователи после ренистрации в боте через e-mail могут отправлять фотографии либо файлы и получать ссылку для скачивания этих файлов.
 
 Для запуска приложения нужно:
-1. Cосдать бота в телеграмме через FatherBot.
+1. Cоздать бота в телеграмме через FatherBot.
 2. Полученый токен и имя бота положеть в application.properties в модуле dispatcher и токен в node.
 3. Развернуть базу данных, заполнить application.properties в rest-service и node
 4. Развернуть RabbitMQ в Docker. Заполнить application.properties в node и dispatcher
