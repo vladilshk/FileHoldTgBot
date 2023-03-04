@@ -15,6 +15,7 @@ import ru.vovai.exceptions.UploadFileException;
 import ru.vovai.service.FileService;
 import ru.vovai.service.MainService;
 import ru.vovai.service.ProducerService;
+import ru.vovai.service.enums.LinkType;
 import ru.vovai.service.enums.ServiceCommands;
 
 import static ru.vovai.entity.enums.UserState.BASIC_STATE;
@@ -72,8 +73,8 @@ public class MainServiceImpl implements MainService {
 
         try {
             AppDocument doc = fileService.processDoc(update.getMessage());
-            //TODO: add file download link generation
-            var answer = "Документ успушно загружен! Ссылка для скачивания: http://test.ru/get-doc/777";
+            String link = fileService.generateLink(doc.getId(), LinkType.GET_DOC);
+            var answer = "Документ успушно загружен! Ссылка для скачивания: " + link;
             sendAnswer(answer, chatId);
         } catch (UploadFileException ex){
             log.error(ex);
@@ -93,8 +94,8 @@ public class MainServiceImpl implements MainService {
 
         try {
             AppPhoto photo = fileService.processPhoto(update.getMessage());
-            //TODO: add photo download link generation
-            var answer = "Фото успушно загружен! Ссылка для скачивания: http://test.ru/get-photo/777";
+            String link = fileService.generateLink(photo.getId(), LinkType.GET_PHOTO);
+            var answer = "Фото успушно загружен! Ссылка для скачивания: " + link;
             sendAnswer(answer, chatId);
         }
         catch (UploadFileException e){

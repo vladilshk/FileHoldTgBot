@@ -17,6 +17,8 @@ import ru.vovai.entity.AppPhoto;
 import ru.vovai.entity.BinaryContent;
 import ru.vovai.exceptions.UploadFileException;
 import ru.vovai.service.FileService;
+import ru.vovai.service.enums.LinkType;
+import ru.vovai.utils.CryptoTool;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,14 +34,18 @@ public class FileServiceImpl implements FileService {
     private String fileInfoUrl;
     @Value("${service.file_storage.url}")
     private String fileStorageUrl;
+    @Value("${link.address}")
+    private String linkAddress;
     private final AppDocumentDAO appDocumentDAO;
     private final BinaryContentDAO binaryContentDAO;
     private final AppPhotoDAO appPhotoDAO;
+    private final CryptoTool cryptoTool;
 
-    public FileServiceImpl(AppDocumentDAO appDocumentDAO, BinaryContentDAO binaryContentDAO, AppPhotoDAO appPhotoDAO) {
+    public FileServiceImpl(AppDocumentDAO appDocumentDAO, BinaryContentDAO binaryContentDAO, AppPhotoDAO appPhotoDAO, CryptoTool cryptoTool) {
         this.appDocumentDAO = appDocumentDAO;
         this.binaryContentDAO = binaryContentDAO;
         this.appPhotoDAO = appPhotoDAO;
+        this.cryptoTool = cryptoTool;
     }
 
     @Override
@@ -60,8 +66,9 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public AppPhoto processPhoto(Message telegramMessage) {
-        //TODO: now we can work only with one photo
-        PhotoSize telegramPhoto = telegramMessage.getPhoto().get(0);
+        var photoSizeCount = telegramMessage.getPhoto().size();
+        var photoIndex = photoSizeCount > 1 ? telegramMessage.getPhoto().size() - 1 : 0;
+        PhotoSize telegramPhoto = telegramMessage.getPhoto().get(photoIndex);
         String fileId = telegramPhoto.getFileId();
         ResponseEntity<String> response = getFilePath(fileId);
         if (response.getStatusCode() == HttpStatus.OK){
@@ -72,6 +79,12 @@ public class FileServiceImpl implements FileService {
         else {
             throw new UploadFileException("Bad response from telegram service: " + response);
         }
+    }
+
+    @Override
+    public String generateLink(Long codId, LinkType linkType) {
+        var hash = cryptoTool.hashOf(codId);
+        return "http://" + linkAddress + "/" + linkType + "?id=" + hash;
     }
 
     private AppPhoto buildTransientAppPhoto(PhotoSize telegramPhoto, BinaryContent persistentBinaryContent) {
