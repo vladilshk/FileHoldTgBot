@@ -12,6 +12,7 @@ import ru.vovai.entity.AppPhoto;
 import ru.vovai.entity.AppUser;
 import ru.vovai.entity.RawData;
 import ru.vovai.exceptions.UploadFileException;
+import ru.vovai.service.AppUserService;
 import ru.vovai.service.FileService;
 import ru.vovai.service.MainService;
 import ru.vovai.service.ProducerService;
@@ -29,12 +30,14 @@ public class MainServiceImpl implements MainService {
     private final ProducerService producerService;
     private final AppUserDAO appUserDAO;
     private final FileService fileService;
+    private final AppUserService appUserService;
 
-    public MainServiceImpl(RawDataDAO rawDataDAO, ProducerService producerService, AppUserDAO appUserDAO, FileService fileService) {
+    public MainServiceImpl(RawDataDAO rawDataDAO, ProducerService producerService, AppUserDAO appUserDAO, FileService fileService, AppUserService appUserService) {
         this.rawDataDAO = rawDataDAO;
         this.producerService = producerService;
         this.appUserDAO = appUserDAO;
         this.fileService = fileService;
+        this.appUserService = appUserService;
     }
 
 
@@ -52,7 +55,7 @@ public class MainServiceImpl implements MainService {
         } else if (BASIC_STATE.equals(userState)){
             output = processServiceCommand(appUser, text);
         } else if (WAIT_FOR_EMAIL_STATE.equals(userState)){
-            //TODO: add email processing
+            output = appUserService.setEmail(appUser, text);
         } else {
             log.error("Unknown user state: " + userState);
             output = "Неизвестная ошибка! Введите /cancel  и попробуйте снова!";
@@ -95,7 +98,7 @@ public class MainServiceImpl implements MainService {
         try {
             AppPhoto photo = fileService.processPhoto(update.getMessage());
             String link = fileService.generateLink(photo.getId(), LinkType.GET_PHOTO);
-            var answer = "Фото успушно загружен! Ссылка для скачивания: " + link;
+            var answer = "Фото успушно загружено! Ссылка для скачивания: " + link;
             sendAnswer(answer, chatId);
         }
         catch (UploadFileException e){
@@ -103,14 +106,13 @@ public class MainServiceImpl implements MainService {
             String error = "К сожалению, загрузка файла не удаласью Повторите попытку позже.";
             sendAnswer(error, chatId);
         }
-
-        //TODO: add photo save
     }
 
     private boolean isNotAllowToSendContent(Long chatId, AppUser appUser) {
         var userState = appUser.getState();
-        if(! appUser.getIsActive()){
+        if(!appUser.getIsActive()){
             var error = "Зарегистрируйтесь или активируйте свою учетную запись для загрузки котента.";
+            sendAnswer(error, chatId);
             return true;
         } else if (!BASIC_STATE.equals(userState)) {
             var error = "Щтмените тукущую команду с помощью /cancel для отправки файлов.";
@@ -127,12 +129,12 @@ public class MainServiceImpl implements MainService {
     }
 
     private String processServiceCommand(AppUser appUser, String cmd) {
-        if (REGISTRATION.equals(cmd)){
-            //TODO: add registration
-            return "Временно недоступно.";
-        } else if (HELP.equals(cmd)) {
+        var serviceCommand = ServiceCommands.fromValue(cmd);
+        if (REGISTRATION.equals(serviceCommand)){
+            return appUserService.registerUser(appUser);
+        } else if (HELP.equals(serviceCommand)) {
             return help();
-        } else if (START.equals(cmd)) {
+        } else if (START.equals(serviceCommand)) {
             return "Приветствую! Чтобы посмотреть список достуаных команд введите /help";
         } else {
             return  "Неизвестная команда! Чтобы посмотреть список достуаных команд введите /help";
@@ -153,22 +155,21 @@ public class MainServiceImpl implements MainService {
 
     private AppUser findOrSaveAppUser(Update update){
         User telegramUser = update.getMessage().getFrom();
-        AppUser persistentAppUser = appUserDAO.findAppUserByTelegramUserId(telegramUser.getId());
+        var optional = appUserDAO.findByTelegramUserId(telegramUser.getId());
 
-        if (persistentAppUser == null){
+        if (optional.isEmpty()){
             AppUser transientAppUser = AppUser.builder()
                     .telegramUserId(telegramUser.getId())
                     .username(telegramUser.getUserName())
                     .firstName(telegramUser.getFirstName())
                     .lastName(telegramUser.getLastName())
-                    //TODO: change standart state from true to false
-                    .isActive(true)
+                    .isActive(false)
                     .state(BASIC_STATE)
                     .build();
             return appUserDAO.save(transientAppUser);
         }
 
-        return persistentAppUser;
+        return optional.get();
     }
 
     private void saveRawData(Update update) {
